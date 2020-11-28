@@ -132,7 +132,7 @@ class AgNews(object):
         self.url = "https://s3.eu-west-2.amazonaws.com/ardalan.mehrani.datasets/ag_news.tar.gz"
         self.data_name = os.path.basename(self.url).split(".")[0] # ag_news
         self.data_folder = "{}/{}/raw".format(DATA_FOLDER, self.data_name)
-        self.n_classes = 4        
+        self.n_classes = 4
         self.epoch_size = 5000
 
         # Check if relevant files are in the folder_path
@@ -170,7 +170,7 @@ class DbPedia(object):
         self.data_name = os.path.basename(self.url).split(".")[0] # ag_news
         self.data_folder = "{}/{}/raw".format(DATA_FOLDER, self.data_name)
         self.n_classes = 14
-        
+
         self.epoch_size = 5000
 
         # Check if relevant files are in the folder_path
@@ -246,12 +246,12 @@ class YelpPolarity(object):
         self.url = "https://s3.eu-west-2.amazonaws.com/ardalan.mehrani.datasets/yelp_review_polarity.tar.gz"
         self.data_name = os.path.basename(self.url).split(".")[0] # ag_news
         self.data_folder = "{}/{}/raw".format(DATA_FOLDER, self.data_name)
-        self.n_classes = 2        
+        self.n_classes = 2
         self.epoch_size = 5000
 
         # Check if relevant files are in the folder_path
         if os.path.exists(self.data_folder):
-            for f in ["readme.txt", "test.csv", "train.csv"]:
+            for f in ["test.csv", "train.csv"]:
                 if not os.path.exists(os.path.join(self.data_folder, f)):
                     self._ = get_file(self.data_name, origin=self.url, untar=True, cache_subdir=self.data_folder)
         else:
@@ -273,6 +273,75 @@ class YelpPolarity(object):
     def load_test_data(self):
         return self._generator(os.path.join(self.data_folder, "test.csv"))
 
+class SubjectivityObjectivity(object):
+    """
+    credit goes to Xiang Zhang:
+    https://scholar.google.com/citations?hl=en&user=n4QjVfoAAAAJ&view_op=list_works&sortby=pubdate
+    """
+    def __init__(self):
+        self.data_name 'subjectobject'
+        self.data_folder = "{}/{}/raw".format(DATA_FOLDER, self.data_name)
+        self.n_classes = 2
+        self.epoch_size = 5000
+
+        # Check if relevant files are in the folder_path
+        if os.path.exists(self.data_folder):
+            for f in ["test.csv", "train.csv"]:
+                if not os.path.exists(os.path.join(self.data_folder, f)):
+                    self._ = get_file(self.data_name, origin=self.url, untar=True, cache_subdir=self.data_folder)
+        else:
+            self._ = get_file(self.data_name, origin=self.url, untar=True, cache_subdir=self.data_folder)
+
+    @staticmethod
+    def _generator(filename):
+
+        with open(filename, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f, fieldnames=['label', 'description'], quotechar='"')
+            for line in reader:
+                sentence = line['description]
+                label = line['label']
+                yield sentence, label
+
+    def load_train_data(self):
+        return self._generator(os.path.join(self.data_folder, "train.csv"))
+
+    def load_test_data(self):
+        return self._generator(os.path.join(self.data_folder, "test.csv"))
+
+class Clickbait(object):
+    """
+    credit goes to Xiang Zhang:
+    https://scholar.google.com/citations?hl=en&user=n4QjVfoAAAAJ&view_op=list_works&sortby=pubdate
+    """
+    def __init__(self):
+        self.data_name 'clickbait'
+        self.data_folder = "{}/{}/raw".format(DATA_FOLDER, self.data_name)
+        self.n_classes = 2
+        self.epoch_size = 5000
+
+        # Check if relevant files are in the folder_path
+        if os.path.exists(self.data_folder):
+            for f in [test.csv", "train.csv"]:
+                if not os.path.exists(os.path.join(self.data_folder, f)):
+                    self._ = get_file(self.data_name, origin=self.url, untar=True, cache_subdir=self.data_folder)
+        else:
+            self._ = get_file(self.data_name, origin=self.url, untar=True, cache_subdir=self.data_folder)
+
+    @staticmethod
+    def _generator(filename):
+
+        with open(filename, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f, fieldnames=['label', 'description'], quotechar='"')
+            for line in reader:
+                sentence = line['description]
+                label = line['label']
+                yield sentence, label
+
+    def load_train_data(self):
+        return self._generator(os.path.join(self.data_folder, "train.csv"))
+
+    def load_test_data(self):
+        return self._generator(os.path.join(self.data_folder, "test.csv"))
 
 class AmazonReview(object):
     """
@@ -436,7 +505,7 @@ class Imdb(object):
         self.data_name = os.path.basename(self.url).split(".")[0] # ag_news
         self.data_folder = "{}/{}/raw".format(DATA_FOLDER, self.data_name)
         self.n_classes = 2
-        
+
 
         # Check if relevant files are in the folder_path
         if os.path.exists(self.data_folder):
@@ -512,7 +581,7 @@ if __name__ == "__main__":
     for name in names:
         print("name: {}".format(name))
         dataset = load_datasets(names=[name])[0]
-        
+
         # train data generator
         gen = dataset.load_train_data()
         sentences, labels = [], []

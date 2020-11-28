@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: 
+@author:
         - Charles-Emmanuel DIAS  <Charles-Emmanuel.Dias@lip6.fr>
         - Ardalan Mehrani <ardalan77400@gmail.com>
 @brief:
@@ -63,15 +63,15 @@ class Preprocessing():
 
     def transform(self, sentences):
         """
-        sentences: list(str) 
+        sentences: list(str)
         output: list(str)
         """
         return [s.lower() for s in sentences]
 
- 
+
 class CharVectorizer():
     def __init__(self, maxlen=10, padding='pre', truncating='pre', alphabet="""abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:’"/| #$%ˆ&*˜‘+=<>()[]{}"""):
-        
+
         self.alphabet = alphabet
         self.maxlen = maxlen
         self.padding = padding
@@ -90,7 +90,7 @@ class CharVectorizer():
 
         for sentence in sentences:
             seq = [self.char_dict.get(char, self.char_dict["_unk_"]) for char in sentence]
-            
+
             if self.maxlen:
                 length = len(seq)
                 if self.truncating == 'pre':
@@ -107,10 +107,10 @@ class CharVectorizer():
 
                     elif self.padding == 'post':
                         seq = seq + [self.char_dict['_pad_']] * diff
-            sequences.append(seq)                
+            sequences.append(seq)
 
-        return sequences        
-    
+        return sequences
+
     def get_params(self):
         params = vars(self)
         return params
@@ -167,11 +167,24 @@ def get_metrics(cm, list_metrics):
         den = cm[1, :].sum()
         dic_metrics['recall_1'] =  num/den if den > 0 else 0
 
+    if 'f1' in list_metrics:
+        prec_num = cm[1, 1]
+        prec_den = cm[:, 1].sum()
+        prec = prec_num/prec_den if prec_den > 0 else 0
+
+        recall_num = cm[1, 1]
+        recall_den = cm[1, :].sum()
+        recall = recall_num/recall_dem if prec_den > 0 else 0
+
+        f1_num = 2 * prec * recall
+        f1_den = prec + recall
+        dic_metrics['f1'] = f1_num/f1_den 
+
     return dic_metrics
 
 
 def train(epoch,net,dataset,device,msg="val/test",optimize=False,optimizer=None,scheduler=None,criterion=None):
-    
+
     net.train() if optimize else net.eval()
 
     epoch_loss = 0
@@ -180,7 +193,7 @@ def train(epoch,net,dataset,device,msg="val/test",optimize=False,optimizer=None,
 
     with tqdm(total=len(dataset),desc="Epoch {} - {}".format(epoch, msg)) as pbar:
         for iteration, (tx, ty) in enumerate(dataset):
-            
+
             data = (tx, ty)
             data = [x.to(device) for x in data]
 
@@ -196,8 +209,8 @@ def train(epoch,net,dataset,device,msg="val/test",optimize=False,optimizer=None,
 
             cm += metrics.confusion_matrix(y_true, y_pred, labels=range(nclasses))
             dic_metrics = get_metrics(cm, list_metrics)
-            
-            loss =  criterion(out, data[1]) 
+
+            loss =  criterion(out, data[1])
             epoch_loss += loss.item()
             dic_metrics['logloss'] = epoch_loss/(iteration+1)
 
@@ -214,7 +227,7 @@ def train(epoch,net,dataset,device,msg="val/test",optimize=False,optimizer=None,
 
 
 def predict(net,dataset,device,msg="prediction"):
-    
+
     net.eval()
 
     y_probs, y_trues = [], []
@@ -252,7 +265,7 @@ if __name__ == "__main__":
 
     opt = get_args()
     print("parameters: {}".format(vars(opt)))
-    
+
     os.makedirs(opt.model_folder, exist_ok=True)
     os.makedirs(opt.data_folder, exist_ok=True)
 
@@ -263,7 +276,7 @@ if __name__ == "__main__":
 
     tr_path =  "{}/train.lmdb".format(opt.data_folder)
     te_path = "{}/test.lmdb".format(opt.data_folder)
-    
+
     # check if datasets exis
     all_exist = True if (os.path.exists(tr_path) and os.path.exists(te_path)) else False
 
@@ -275,7 +288,7 @@ if __name__ == "__main__":
         print("Creating datasets")
         tr_sentences = [txt for txt,lab in tqdm(dataset.load_train_data(), desc="counting train samples")]
         te_sentences = [txt for txt,lab in tqdm(dataset.load_test_data(), desc="counting test samples")]
-            
+
         n_tr_samples = len(tr_sentences)
         n_te_samples = len(te_sentences)
         del tr_sentences
@@ -295,7 +308,7 @@ if __name__ == "__main__":
 
                     txt_key = 'txt-%09d' % i
                     lab_key = 'lab-%09d' % i
-                    
+
                     txn.put(lab_key.encode(), list_to_bytes([lab]))
                     txn.put(txt_key.encode(), list_to_bytes(xtxt))
 
@@ -313,19 +326,19 @@ if __name__ == "__main__":
 
                     txt_key = 'txt-%09d' % i
                     lab_key = 'lab-%09d' % i
-                    
+
                     txn.put(lab_key.encode(), list_to_bytes([lab]))
                     txn.put(txt_key.encode(), list_to_bytes(xtxt))
 
                 txn.put('nsamples'.encode(), list_to_bytes([i+1]))
 
-                
+
     tr_loader = DataLoader(TupleLoader(tr_path), batch_size=opt.batch_size, shuffle=True, num_workers=opt.nthreads, pin_memory=True)
     te_loader = DataLoader(TupleLoader(te_path), batch_size=opt.batch_size, shuffle=False, num_workers=opt.nthreads, pin_memory=False)
 
     # select cpu or gpu
     device = torch.device("cuda:{}".format(opt.gpuid) if opt.gpuid >= 0 else "cpu")
-    list_metrics = ['accuracy']
+    list_metrics = ['accuracy', 'f1', 'pres_1', 'recall_1']
 
 
     print("Creating model...")
@@ -339,13 +352,13 @@ if __name__ == "__main__":
         optimizer = torch.optim.SGD(net.parameters(), lr = opt.lr, momentum=opt.momentum)
     elif opt.solver == 'adam':
         print(" - optimizer: adam")
-        optimizer = torch.optim.Adam(net.parameters(), lr = opt.lr)    
-        
+        optimizer = torch.optim.Adam(net.parameters(), lr = opt.lr)
+
     scheduler = None
     if opt.lr_halve_interval and  opt.lr_halve_interval > 0:
         print(" - lr scheduler: {}".format(opt.lr_halve_interval))
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, opt.lr_halve_interval, gamma=opt.gamma, last_epoch=-1)
-        
+
     for epoch in range(1, opt.epochs + 1):
         train(epoch,net, tr_loader, device, msg="training", optimize=True, optimizer=optimizer, scheduler=scheduler, criterion=criterion)
         train(epoch,net, te_loader, device, msg="testing ", criterion=criterion)

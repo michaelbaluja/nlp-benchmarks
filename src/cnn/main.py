@@ -247,7 +247,7 @@ if __name__ == "__main__":
 
     # select cpu or gpu
     device = torch.device("cuda:{}".format(opt.gpuid) if opt.gpuid >= 0 else "cpu")
-    list_metrics = ['accuracy']
+    list_metrics = ['accuracy', 'pres_1', 'recall_1', 'f1']
 
 
     print("Creating model...")

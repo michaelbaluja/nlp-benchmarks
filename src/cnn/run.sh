@@ -16,7 +16,7 @@ batch_size=128
 epochs=100
 lr=0.01
 snapshot_interval=5
-gpuid=0
+gpuid=-1
 nthreads=6
 
 

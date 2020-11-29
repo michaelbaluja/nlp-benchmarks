@@ -40,6 +40,19 @@ def get_metrics(cm, list_metrics):
         num = cm[1, 1]
         den = cm[1, :].sum()
         dic_metrics['recall_1'] =  num/den if den > 0 else 0
+        
+    if 'f1' in list_metrics:
+        prec_num = cm[1, 1]
+        prec_den = cm[:, 1].sum()
+        prec = prec_num/prec_den if prec_den > 0 else 0
+
+        recall_num = cm[1, 1]
+        recall_den = cm[1, :].sum()
+        recall = recall_num/recall_dem if prec_den > 0 else 0
+
+        f1_num = 2 * prec * recall
+        f1_den = prec + recall
+        dic_metrics['f1'] = f1_num/f1_den 
 
     return dic_metrics
 

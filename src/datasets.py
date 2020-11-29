@@ -264,7 +264,7 @@ class YelpPolarity(object):
             reader = csv.DictReader(f, fieldnames=['label', 'title', 'description'], quotechar='"')
             for line in reader:
                 sentence = "{} {}".format(line['title'], line['description'])
-                label = int(line['label']) - 1
+                label = int(line['label'])
                 yield sentence, label
 
     def load_train_data(self):
@@ -298,8 +298,8 @@ class SubjectivityObjectivity(object):
         with open(filename, mode='r', encoding='utf-8') as f:
             reader = csv.DictReader(f, fieldnames=['label', 'description'], quotechar='"')
             for line in reader:
-                sentence = line['description]
-                label = line['label']
+                sentence = line['description']
+                label = int(line['label'])
                 yield sentence, label
 
     def load_train_data(self):
@@ -333,8 +333,8 @@ class Clickbait(object):
         with open(filename, mode='r', encoding='utf-8') as f:
             reader = csv.DictReader(f, fieldnames=['label', 'description'], quotechar='"')
             for line in reader:
-                sentence = line['description]
-                label = line['label']
+                sentence = line['description']
+                label = int(line['label'])
                 yield sentence, label
 
     def load_train_data(self):

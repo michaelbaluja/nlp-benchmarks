@@ -48,7 +48,7 @@ def get_metrics(cm, list_metrics):
 
         recall_num = cm[1, 1]
         recall_den = cm[1, :].sum()
-        recall = recall_num/recall_dem if prec_den > 0 else 0
+        recall = recall_num/recall_den if recall_den > 0 else 0
 
         f1_num = 2 * prec * recall
         f1_den = prec + recall

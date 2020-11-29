@@ -279,7 +279,7 @@ class SubjectivityObjectivity(object):
     https://scholar.google.com/citations?hl=en&user=n4QjVfoAAAAJ&view_op=list_works&sortby=pubdate
     """
     def __init__(self):
-        self.data_name 'subjectobject'
+        self.data_name = 'subjectobject'
         self.data_folder = "{}/{}/raw".format(DATA_FOLDER, self.data_name)
         self.n_classes = 2
         self.epoch_size = 5000
@@ -314,14 +314,14 @@ class Clickbait(object):
     https://scholar.google.com/citations?hl=en&user=n4QjVfoAAAAJ&view_op=list_works&sortby=pubdate
     """
     def __init__(self):
-        self.data_name 'clickbait'
+        self.data_name = 'clickbait'
         self.data_folder = "{}/{}/raw".format(DATA_FOLDER, self.data_name)
         self.n_classes = 2
         self.epoch_size = 5000
 
         # Check if relevant files are in the folder_path
         if os.path.exists(self.data_folder):
-            for f in [test.csv", "train.csv"]:
+            for f in ["test.csv", "train.csv"]:
                 if not os.path.exists(os.path.join(self.data_folder, f)):
                     self._ = get_file(self.data_name, origin=self.url, untar=True, cache_subdir=self.data_folder)
         else:
